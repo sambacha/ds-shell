@@ -1,0 +1,3 @@
+[submodule "sharnessify"]
+	path = sharnessify
+	url = https://github.com/chriscool/sharnessify
