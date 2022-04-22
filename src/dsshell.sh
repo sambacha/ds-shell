@@ -43,9 +43,6 @@ if [ -t 1 ] && command -v tput >/dev/null; then
     white="$(tput setaf 7 || echo)"
   fi
 fi
-<<<<<<< HEAD
-=======
-
 
 # Creates an archive (*.tar.gz) from given directory.
 function maketar() { tar cvzf "${1%%/}.tar.gz"  "${1%%/}/"; }
@@ -56,9 +53,7 @@ function makezip() { zip -r "${1%%/}.zip" "$1" ; }
 # Make your directories and files access rights sane.
 function sanitize() { chmod -R u=rwX,g=rX,o= "$@" ;}
 
-
 # Local Variables:
 # mode:shell-script
 # sh-shell:bash
 # End:
->>>>>>> a8145d7e5d2f5a5226af047a795cd43862c5837c
