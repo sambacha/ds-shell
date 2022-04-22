@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/sh
 
 # Regular expression matching at least one whitespace.
 SPACE_RE='[[:space:]][[:space:]]*'
