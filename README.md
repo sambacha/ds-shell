@@ -1,8 +1,20 @@
-# ds-shell
+# [ds-shell](https://github.com/sambacha/ds-shell)
 
->
+> GNU bash, version 5.1.0(1)-release.   
+> Copyright (C) 2020 Free Software Foundation, Inc.   
+> License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.   
+     
+> This is free software; you are free to change and redistribute it.    
+> There is NO WARRANTY, to the extent permitted by law.   
 
-## `bash`: concepts
+## [bash](#) - concepts
+
+- [Bash Concepts](#bash-concepts)
+  * [Success and Failure Return Codes](#success-and-failure-return-codes)
+  * [Stdout and Stderr](#stdout-and-stderr)
+    + [Sourcing Files](#sourcing-files)
+  * [Bash Strict Mode](#bash-strict-mode)
+
 
 Bash is aligned strongly with the **Unix philosophy**.  As such, this can cause moments of confusion while trying to understand why and how things work the way that they do.  The goal of this document is to demystify various topics and let the rest of the documentation link here instead of explaining it poorly multiple times.
 
@@ -24,9 +36,7 @@ Comments to explain commands are added sometimes to help clarify what's going on
     ~$
 ```
 
-## Success and Failure: Return Codes
-
-> see [openbsd/src/blob/master/sys/sys/errno.h](https://github.com/openbsd/src/blob/master/sys/sys/errno.h)
+## Success and Failure Return Codes
 
 Programs can report success by returning a status code of 0.  Anything else is considered a failure.  In the way of the Unix, there is only one success but many reasons why something can fail.
 
@@ -66,7 +76,6 @@ Shell scripts can pick their return code and abruptly stop the program at any ti
 
 ## Stdout and Stderr
 
-
 Every process that's running can write output to "stdout" and "stderr".  Typically, the non-error output goes to stdout and error messages go to stderr.  Stdout is captured using `>` and stderr is captured using `2>`.  Take a look at this example.
 
 ```bash 
@@ -105,7 +114,6 @@ Writing content to stderr is slightly more difficult, but you can do it!
 ```
 
 ### Sourcing Files
-
 
 Here is sourcing a file in two different ways:
 
@@ -159,19 +167,18 @@ As found on [another website](http://redsymbol.net/articles/unofficial-bash-stri
     set -eEu -o pipefail
     shopt -s extdebug
     IFS=$'\n\t'
-    trap 'wickStrictModeFail $?' ERR
+    trap 'StrictModeFail $?' ERR
 ```
 
 A brief summary of what each option does:
 
 * `set -e`: Exit immediately if a command exits with a non-zero status, unless that command is part a test condition.  On failure this triggers the ERR trap. **There are [some contexts][exit on error] that will disable this setting!**
-* `set -E`: The ERR trap is inherited by shell functions, command substitutions and commands in subshells.  This helps us use `wickStrictModeFail` wherever `set -e` is enabled.
+* `set -E`: The ERR trap is inherited by shell functions, command substitutions and commands in subshells.  This helps us use `StrictModeFail` wherever `set -e` is enabled.
 * `set -u`: Exit and trigger the ERR trap when accessing an unset variable.  This helps catch typos in variable names.
 * `set -o pipefail`: The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status.  So, `a | b | c` can return `a`'s status when `b` and `c` both return a zero status.  It is easier to catch problems during the middle of processing a pipeline this way.
 * `shopt -s extdebug`: Enable extended debugging.  Bash will track the parameters to all the functions in the call stack, allowing the stack trace to also display the parameters that were used.
 * `IFS=$'\n\t'`: Set the "internal field separator", which is a list of characters use for word splitting after expansion and to split lines into words with the `read` builtin command.  Normally this is `$' \t\n'` and we're removing the space.  This helps us catch other issues when we may rely on IFS or accidentally use it incorrectly.
-* `trap 'wickStrictModeFail $?' ERR`:  The ERR trap is triggered when a script catches an error.  `wickStrictModeFail` attempts to produce a stack trace to aid in debugging.  We pass `$?` as the first argument so we have access to the return code of the failed command.
+* `trap 'StrictModeFail $?' ERR`:  The ERR trap is triggered when a script catches an error.  `StrictModeFail` attempts to produce a stack trace to aid in debugging.  We pass `$?` as the first argument so we have access to the return code of the failed command.
 
-This document deals heavily with status codes, conditionals, and other constructs in Bash scripts.  For more information on those, read about [#concepts].
 
 
