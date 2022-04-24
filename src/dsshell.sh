@@ -43,8 +43,6 @@ if [ -t 1 ] && command -v tput >/dev/null; then
     white="$(tput setaf 7 || echo)"
   fi
 fi
-<<<<<<< HEAD
-=======
 
 
 # Creates an archive (*.tar.gz) from given directory.
@@ -61,4 +59,3 @@ function sanitize() { chmod -R u=rwX,g=rX,o= "$@" ;}
 # mode:shell-script
 # sh-shell:bash
 # End:
->>>>>>> a8145d7e5d2f5a5226af047a795cd43862c5837c
