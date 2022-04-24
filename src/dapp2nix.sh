@@ -37,8 +37,8 @@ alias=${url##*/}; con=${alias}_${rev::7};
 
 submods() {
   git submodule --quiet foreach --recursive \
-    "$getSpec"'printf %s\\n "$PWD $con"' \
-    | sort -k2 -u
+    "$getSpec"'printf %s\\n "$PWD $con"' |
+    sort -k2 -u
 }
 export -f submods
 
@@ -49,7 +49,8 @@ subdeps() {
 export -f subdeps
 
 spec() {
-  (cd "$1"
+  (
+    cd "$1"
     eval "$getSpec"
     deps=$(subdeps)
     name=$alias-${rev::7}
@@ -72,11 +73,14 @@ export -f spec
 specs() {
   eval "$getSpec"
 
-  local repos; repos="$1
+  local repos
+  repos="$1
 $PWD $con"
-  local root; root=$(realpath .)
-  local deps;
-  local sep; sep=""
+  local root
+  root=$(realpath .)
+  local deps
+  local sep
+  sep=""
 
   printf %s "{
   \"contracts\": {"
@@ -85,7 +89,8 @@ $PWD $con"
   for path in $(cut -d " " -f1 <<<"$repos"); do
 
     if [[ $path != "$root" ]]; then
-      printf %s "$sep"; sep=","
+      printf %s "$sep"
+      sep=","
       if [[ -f "$path/.dsforge.json" ]]; then
         jq .contracts "$path/.dsforge.json" | sed '1d;$d'
       else
@@ -104,9 +109,13 @@ $(spec "$path" | sed '1,2d;$d')
 export -f specs
 
 main() {
-  local repos; repos=$(submods)
+  local repos
+  repos=$(submods)
 
-  [ -n "$repos" ] || { echo >&2 'Submodules not initiated? Run: `git submodule update --init --recursive`'; exit 1; }
+  [ -n "$repos" ] || {
+    echo >&2 'Submodules not initiated? Run: `git submodule update --init --recursive`'
+    exit 1
+  }
 
   specs "$repos"
 }
@@ -114,7 +123,8 @@ export -f main
 
 clone() {
   [[ -d "$3/.git" ]] || git clone "$1" "$3" >&2
-  (cd "$3" || exit 3
+  (
+    cd "$3" || exit 3
     git fetch >&2 || exit 3
     git checkout "${2:-HEAD}" >&2 || exit 3
     git pull >&2 || true
@@ -122,13 +132,16 @@ clone() {
 }
 
 tmpclone() {
-  local target; target="$CACHE_DIR/${1##*/}"
-  [[ -d "$target" && "$1" == "$(git -C "$target" remote get-url origin)" ]] \
-    || rm -rf "$target"
+  local target
+  target="$CACHE_DIR/${1##*/}"
+  [[ -d "$target" && "$1" == "$(git -C "$target" remote get-url origin)" ]] ||
+    rm -rf "$target"
   clone "$1" "${2:-HEAD}" "$target" >&2
-  (cd "$target" || exit 3
+  (
+    cd "$target" || exit 3
     if [[ -f "./dsforge.json" ]]; then
-      local repo; repo=$(jq -c .repo <<<"$(spec "$target" | sed '1s/^.*://')")
+      local repo
+      repo=$(jq -c .repo <<<"$(spec "$target" | sed '1s/^.*://')")
       jq ".this.repo = $repo" ./dsforge.json
     else
       git submodule deinit --all -f >/dev/null >&2 || exit 3
@@ -194,7 +207,7 @@ init() {
   cat \
     <(echo "# [auto]: gen by dsforge $DSFORGE_VERSION") \
     "${DSFORGE_EXPR:-${BASH_SOURCE[0]%/*}/dsforge.nix}" \
-    > "$1/dsforge.nix"
+    >"$1/dsforge.nix"
   printf %s "
 {
   \"contracts\": {},
@@ -256,7 +269,8 @@ clone_deps() {
     target="${2:-.}/$dep"
     clone "$url" "$rev" "$target"
     if [[ "$3" == "--recursive" ]]; then
-      (cd "$target" || exit 3
+      (
+        cd "$target" || exit 3
         git submodule update --init --recursive >&2 || exit 3
       ) || exit $?
     fi
@@ -275,7 +289,7 @@ save() {
     | del(.this.repo)
   ' <<<"$jsonOut")
   if [[ -n "$jsonOut" ]]; then
-    echo "$jsonOut" > "$2"
+    echo "$jsonOut" >"$2"
   else
     exit 5
   fi
@@ -284,59 +298,59 @@ save() {
 outPath="$PWD/.dsforge.json"
 outDir="$PWD"
 
-[[ -f "$outPath" || $1 == init || $1 == migrate ]] 
+[[ -f "$outPath" || $1 == init || $1 == migrate ]]
 
 case "${1:-help}" in
-  init)
-    [[ ! -e "$outPath" ]] || {
-      echo >&2 ".dsforge.json already exists, will not init"
-      exit 1
-    }
-    save "$(init "$outDir")" "$outPath"
-    ;;
-  migrate)
-    [[ ! -e "$outPath" ]] || {
-      echo >&2 ".dsforge.json already exists, will not migrate"
-      exit 1
-    }
-    init "$outDir" >/dev/null
-    save "$(main)" "$outPath"
-    ;;
-  add)
-    jsonOut=$(add_dep "$(cat "$outPath")" "$2" "$3") || exit $?
-    save "$jsonOut" "$outPath"
-    ;;
-  remove|rm)
-    jsonOut=$(remove_dep "$(cat "$outPath")" "$2") || exit $?
-    save "$jsonOut" "$outPath"
-    ;;
-  list|ls)
-    list_deps "$(cat "$outPath")" | column -t -s" "
-    ;;
-  duplicates|dup)
-    jq -r '.contracts[] | values | "\(.repo.rev) \(.name)"' "$outPath" \
-      | sort -k2 | uniq -f1 -D | column -t -s" "
-    ;;
-  update|up)
-    if [[ -n $2 ]]; then
-      jsonOut=$(update_dep "$(cat "$outPath")" "$2" "$3") || exit $?
-    else
-      jsonOut=$(update_deps "$(cat "$outPath")") || exit $?
-    fi
-    save "$jsonOut" "$outPath"
-    ;;
-  clone)
-    clone_deps "$(cat "$outPath")" "${2:-lib}"
-    ;;
-  clone-recursive)
-    clone_deps "$(cat "$outPath")" "${2:-lib}" --recursive
-    ;;
-  help)
-    usage
-    ;;
-  *)
-    echo >&2 "No command $1"
-    usage
+init)
+  [[ ! -e "$outPath" ]] || {
+    echo >&2 ".dsforge.json already exists, will not init"
     exit 1
-    ;;
+  }
+  save "$(init "$outDir")" "$outPath"
+  ;;
+migrate)
+  [[ ! -e "$outPath" ]] || {
+    echo >&2 ".dsforge.json already exists, will not migrate"
+    exit 1
+  }
+  init "$outDir" >/dev/null
+  save "$(main)" "$outPath"
+  ;;
+add)
+  jsonOut=$(add_dep "$(cat "$outPath")" "$2" "$3") || exit $?
+  save "$jsonOut" "$outPath"
+  ;;
+remove | rm)
+  jsonOut=$(remove_dep "$(cat "$outPath")" "$2") || exit $?
+  save "$jsonOut" "$outPath"
+  ;;
+list | ls)
+  list_deps "$(cat "$outPath")" | column -t -s" "
+  ;;
+duplicates | dup)
+  jq -r '.contracts[] | values | "\(.repo.rev) \(.name)"' "$outPath" |
+    sort -k2 | uniq -f1 -D | column -t -s" "
+  ;;
+update | up)
+  if [[ -n $2 ]]; then
+    jsonOut=$(update_dep "$(cat "$outPath")" "$2" "$3") || exit $?
+  else
+    jsonOut=$(update_deps "$(cat "$outPath")") || exit $?
+  fi
+  save "$jsonOut" "$outPath"
+  ;;
+clone)
+  clone_deps "$(cat "$outPath")" "${2:-lib}"
+  ;;
+clone-recursive)
+  clone_deps "$(cat "$outPath")" "${2:-lib}" --recursive
+  ;;
+help)
+  usage
+  ;;
+*)
+  echo >&2 "No command $1"
+  usage
+  exit 1
+  ;;
 esac
