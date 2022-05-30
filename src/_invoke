@@ -1,0 +1,2 @@
+# when being sourced, $0 == bash, only invoke main when they are the same
+[[ "$0" != "$BASH_SOURCE" ]] ||  main "$@"
