@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -eo pipefail; [[ $RELEASE_TRACE ]] && set -x
 # -*- shell-script -*-
 # Top-level program. This program may be initially invoked.
 #
