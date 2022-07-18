@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Similar to python `enumerate()`:
+# a
+# b
+# =>
+# 0 a
+# 1 b
+enumerate() {
+    nl -v0 -w1 -s' ' "$@"
+}
