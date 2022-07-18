@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Turn whitespaces into newlines:
+# a b
+# c
+# =>
+# a
+# b
+# c
+flat() {
+    tr ' ' '\n' "$@"
+}
