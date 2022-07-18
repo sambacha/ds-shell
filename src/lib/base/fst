@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# a b => a
+fst() {
+    cut -d ' ' -f 1 "$@"
+}
