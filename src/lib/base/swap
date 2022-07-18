@@ -1,0 +1,6 @@
+!/usr/bin/env bash
+# Swap the first two columns in a file (and ignore the other columns):
+# a b => b a
+swap() {
+    awk '{ print $2 " " $1 }'
+}
