@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+jaccard() {
+    # We don't need to sort because our input files are already sorted
+    comm --total --check-order "$@" | tail -n 1 | awk '{ print ($3 / ($3 + $2 + $1)) }'
+}
